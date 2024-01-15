@@ -1,0 +1,309 @@
+<html>
+<head><meta charset="utf-8"/>
+<meta http-equiv="Content-Disposition: attachment; filename='Reykjanesskagi.stl'" content="application/octet-stream"/>
+<script src="list/index.js"></script>
+</head>
+<body>
+<script>
+    var counter = 0;
+    var meters_X = 0;
+    var meters_Y = 0;
+    var center_lat = 63.84770;
+    var center_lon = -22.42216;
+    //WriteBgnEnd();
+    for(quakeID in quakes) {
+        var quake = quakes[quakeID];
+        if(quake.originating_system === 'deleted') { continue; }
+        quake.time = Number(quake.time);
+        quake.size = Number(quake.magnitude);
+        quake.lat = Number(quake.lat);
+        quake.lon = Number(quake.lon);
+        quake.depth = Number(quake.depth);
+        //if( counter == 0 ) { // the first coordinate in the dataset is used as the center of the STL file
+        //    center_lat = quake.lat;
+        //    center_lon = quake.lon;
+        //} else {
+            meters_Y = measure( center_lat, center_lon, quake.lat, center_lon );
+            meters_X = measure( center_lat, center_lon, center_lat, quake.lon );
+            if( center_lat > quake.lat ) {
+                meters_Y = 0 - meters_Y;
+            }
+            if( center_lon < quake.lon ) {
+                meters_X = 0 - meters_X;
+            }
+        //}
+        var quakeTime = (quake.time * 1000);
+        quake.prettyDate = new Date(quakeTime).toISOString().slice(0,-5).replace('T', ' ');
+        //WriteScreen(quake);
+        WriteStlBlob( meters_Y, meters_X, 1000*quake.depth );
+        //ReWriteData( counter, quake );
+        counter++;
+    }
+    //ReWriteDataEnd();
+    WriteStlEnd();
+    //WriteScreenEnd();
+
+    function measure(lat1, lon1, lat2, lon2){  // generally used geo measurement function
+        var R = 6378.137; // Radius of earth in km
+        var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+        var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var d = R * c;
+        return d * 1000; // distance in meters between the two coordinates
+    }
+    function WriteScreen( quake ) {
+        document.write(quake.id + " " + quake.prettyDate + " " + quake.size.toFixed(3) + " " + quake.lat.toFixed(5) + " " + quake.lon.toFixed(5) + " " + (1000*quake.depth).toFixed(0) + " " + meters_X.toFixed(2) + " " + meters_Y.toFixed(2) + "<br>");
+    }
+    function ReWriteData( counter, quake ) {
+        if( counter == 0 ) {
+            document.write( "var quakes = {\"" + quake.id + "\":{<br>" );
+        } else {
+            document.write( ",\""              + quake.id + "\":{<br>" );
+        }
+        document.write(  "\"id\":\""                 + quake.id                   + "\"<br>" );
+        document.write( ",\"time\":\""               + quake.time                 + "\"<br>" );
+        document.write( ",\"lat\":\""                + quake.lat                  + "\"<br>" );
+        document.write( ",\"lon\":\""                + quake.lon                  + "\"<br>" );
+        document.write( ",\"depth\":\""              + quake.depth                + "\"<br>" );
+        document.write( ",\"magnitude\":\""          + quake.magnitude            + "\"<br>" );
+        document.write( ",\"magnitude_type\":\""     + quake.magnitude_type       + "\"<br>" );
+        document.write( ",\"seismic_moment\":\""     + quake.seismic_moment       + "\"<br>" );
+        document.write( ",\"strike\":\""             + quake.strike               + "\"<br>" );
+        document.write( ",\"slip\":\""               + quake.slip                 + "\"<br>" );
+        document.write( ",\"dip\":\""                + quake.dip                  + "\"<br>" );
+        document.write( ",\"originating_system\":\"" + quake.originating_system   + "\"<br>" );
+        document.write( "}<br>" );
+    }
+    function ReWriteDataEnd( counter, quake ) {
+        document.write( "};<br>" );
+    }
+    function WriteScreenEnd() {
+        document.write(counter + "<br>");
+    }
+    function WriteStlBgn() {
+        document.write( "solid test.stl\n<br>" );
+    }
+    function WriteStlBlob( meters_Y, meters_X, meters_depth ) {
+        var Y = meters_Y * 10;
+        var X = meters_X * 10;
+        var D = 0-meters_depth; // * 1000;
+        document.write( "solid model.stl<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + (X+500.0) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + (X-500.0) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y-1000.0)   + " " + (X      ) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + (X-500.0   ) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + (X+500.0   ) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y-500.0   ) + " " + (X-866.0254) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y-500.0   ) + " " + (X-866.0254) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + (X+500.0   ) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y-500.0   ) + " " + (X+866.0254) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y-500.0) + " " + (X-866.0254) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y-500.0) + " " + (X+866.0254) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y      ) + " " + (X-1000.0  ) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y      ) + " " + (X-1000.0  ) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y-500.0) + " " + (X+866.0254) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y      ) + " " + (X+1000.0  ) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y      ) + " " + (X-1000.0  ) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y      ) + " " + (X+1000.0  ) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y+500.0) + " " + (X-866.0254) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+500.0) + " " + (X-866.0254) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y      ) + " " + (X+1000.0  ) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y+500.0) + " " + (X+866.0254) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+500.0)    + " " + (X-866.0254) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y+500.0)    + " " + (X+866.0254) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + (X-500.0   ) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + (X-500.0   ) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y+500.0   ) + " " + (X+866.0254) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + (X+500.0   ) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 0.0 -1.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + (X-500.0) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + (X+500.0) + " " + D +"<br>" );
+        document.write( "   vertex " + (Y+1000.0  ) + " " + (X      ) + " " + D +"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y-500.0) + " " + X + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + (Y+500.0) + " " + X + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + (Y      ) + " " + X + " " + (D-1000.0  )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+500.0   ) + " " + X + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + (Y-500.0   ) + " " + X + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + X + " " + (D-500.0   )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+500.0   ) + " " + X + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + X + " " + (D-500.0   )+"<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + X + " " + (D-500.0   )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + X + " " + (D-500.0)+"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + X + " " + (D-500.0)+"<br>" );
+        document.write( "   vertex " + (Y-1000.0  ) + " " + X + " " + (D      )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + X + " " + (D-500.0)+"<br>" );
+        document.write( "   vertex " + (Y-1000.0  ) + " " + X + " " + (D      )+"<br>" );
+        document.write( "   vertex " + (Y+1000.0  ) + " " + X + " " + (D      )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+1000.0  ) + " " + X + " " + (D      )+"<br>" );
+        document.write( "   vertex " + (Y-1000.0  ) + " " + X + " " + (D      )+"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + X + " " + (D+500.0)+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+1000.0  ) + " " + X + " " + (D      )+"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + X + " " + (D+500.0)+"<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + X + " " + (D+500.0)+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + X + " " + (D+500.0   )+"<br>" );
+        document.write( "   vertex " + (Y-866.0254) + " " + X + " " + (D+500.0   )+"<br>" );
+        document.write( "   vertex " + (Y-500.0   ) + " " + X + " " + (D+866.0254)+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+866.0254) + " " + X + " " + (D+500.0   )+"<br>" );
+        document.write( "   vertex " + (Y-500.0   ) + " " + X + " " + (D+866.0254)+"<br>" );
+        document.write( "   vertex " + (Y+500.0   ) + " " + X + " " + (D+866.0254)+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 0.0 1.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + (Y+500.0) + " " + X + " " + (D+866.0254)+"<br>" );
+        document.write( "   vertex " + (Y-500.0) + " " + X + " " + (D+866.0254)+"<br>" );
+        document.write( "   vertex " + (Y      ) + " " + X + " " + (D+1000.0  )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X-866.0254) + " " + (D-500.0)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X-866.0254) + " " + (D+500.0)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X-1000.0  ) + " " + (D      )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X-866.0254) + " " + (D+500.0   )+"<br>" );
+        document.write( "   vertex " + Y + " " + (X-866.0254) + " " + (D-500.0   )+"<br>" );
+        document.write( "   vertex " + Y + " " + (X-500.0   ) + " " + (D-866.0254)+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X-866.0254) + " " + (D+500.0   )+"<br>" );
+        document.write( "   vertex " + Y + " " + (X-500.0   ) + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X-500.0   ) + " " + (D+866.0254)+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X-500.0) + " " + (D+866.0254)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X-500.0) + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X      ) + " " + (D-1000.0  )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X-500.0) + " " + (D+866.0254)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X      ) + " " + (D-1000.0  )+"<br>" );
+        document.write( "   vertex " + Y + " " + (X      ) + " " + (D+1000.0  )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X      ) + " " + (D+1000.0  )+"<br>" );
+        document.write( "   vertex " + Y + " " + (X      ) + " " + (D-1000.0  )+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+500.0) + " " + (D-866.0254)+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X      ) + " " + (D+1000.0  )+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+500.0) + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+500.0) + " " + (D+866.0254)+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X+500.0   ) + " " + (D+866.0254)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+500.0   ) + " " + (D-866.0254)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+866.0254) + " " + (D-500.0   )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X+500.0   ) + " " + (D+866.0254)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+866.0254) + " " + (D-500.0   )+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+866.0254) + " " + (D+500.0   )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( " facet normal 1.0 0.0 0.0<br>" );
+        document.write( "  outer loop<br>" );
+        document.write( "   vertex " + Y + " " + (X+866.0254) + " " + (D+500.0)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+866.0254) + " " + (D-500.0)+"<br>" );
+        document.write( "   vertex " + Y + " " + (X+1000.0  ) + " " + (D      )+"<br>" );
+        document.write( "  endloop<br>" );
+        document.write( " endfacet<br>" );
+        document.write( "endsolid model.stl<br>" );
+    }
+    function WriteStlEnd() {
+        document.write( "endsolid\n<br>" );
+    }
+</script>
+</body>
+</html>
