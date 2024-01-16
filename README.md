@@ -8,4 +8,7 @@ I wrote this program in a single afternoon and it might be full of bugs :-)
 I cannot tell whether the 3D picture shows the expected magma concentration. I am not an expert in the subject and the data that I could get my hands on is from a very short period but to me it looks like a big crack in the bedrock. If somebody can supply the seismic data from a longer period, for instance retrieved in the period covering both eruptions, I would really like to give it another try.
 
 I cannot supply the data that I used to create this STL file, I used a file from a website without asking for permission ;-)
-.
+
+Grindavik.skp can be viewed with Google Sketchup which is still available at:
+https://web.archive.org/web/20071020070614/http://dl.google.com/sketchup/GoogleSketchUpWEN.exe
+https://web.archive.org/web/20121103025435/http://dl.google.com/sketchup/GoogleSketchUpWEN.exe
