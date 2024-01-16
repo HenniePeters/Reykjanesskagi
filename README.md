@@ -9,6 +9,6 @@ I cannot tell whether the 3D picture shows the expected magma concentration. I a
 
 I cannot supply the data that I used to create this STL file, I used a file from a website without asking for permission ;-)
 
-Grindavik.skp can be viewed with Google Sketchup which is still available at:
-https://web.archive.org/web/20071020070614/http://dl.google.com/sketchup/GoogleSketchUpWEN.exe
-https://web.archive.org/web/20121103025435/http://dl.google.com/sketchup/GoogleSketchUpWEN.exe
+Grindavik.skp can be viewed with Google Sketchup which is still available at:  
+https://web.archive.org/web/20071020070614/http://dl.google.com/sketchup/GoogleSketchUpWEN.exe  
+https://web.archive.org/web/20121103025435/http://dl.google.com/sketchup/GoogleSketchUpWEN.exe  
